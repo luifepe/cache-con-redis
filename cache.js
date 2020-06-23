@@ -1,54 +1,64 @@
 import redis from 'redis'
 const redisClient = redis.createClient(6379, '127.0.0.1')
 
-const chave = () => {
+const chavePlate = () => {
     return {
-        plate: "ABC",
-        renavam: 123
-}
+        placa: 'ABC',
+        renavam:123,
+        debitos:[
+            {
+                valor:200,
+                descricao: "Multa A"
+            },
+            {
+                valor: 500,
+                descricao: "Multa B"
+            }            
+        ]                
+    }
 }
 
-const verificoPlacaEnCache = (plate) => {
+
+
+const verificoEnCache = (plate) => {
 
     redisClient.get(`${plate}`, (err, obj) => {
+
         if (obj) {
             console.log('Encontrado en la cache')
             return obj
         }
 
         console.log('Buscando información fuera de la cache')
-        redisClient.setex(`${plate}`, 3600, JSON.stringify (chave()))
-        return chave()
+        redisClient.setex(`${plate}`, 3600, JSON.stringify (chavePlate()))
+        return chavePlate()
+
     })
     
-    return chave()
+    return chavePlate()
 }
 
 
 
-const verificoRenavamEnCache = (renavam) => {
 
-    redisClient.get(`${renavam}`, (err, obj) => {
-        if (obj) {
+
+
+const find = (plate) => {
+    return redisClient.get (`${plate}` , (verificoEnCache) => {
+        if (chavePlate.placa === 'ABC' && chavePlate.renavam === 123){
             console.log('Encontrado en la cache')
-            return obj
-        }
-
-        console.log('Buscando información fuera de la cache')
-        redisClient.setex(`${renavam}`, 3600, JSON.stringify (chave()))
-        return chave()
+            return{
+                verificoEnCache
+            }
+        } 
     })
-
-    
-    return chave()
 }
 
 
-
 export {
-    verificoPlacaEnCache
+    find
 }
 
 export {
-    verificoRenavamEnCache
+    verificoEnCache, 
 }
